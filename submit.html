@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Submit Clip - Guess The Rank</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 500px;
+        margin: auto;
+        background-color: lightslategray;
+        color: whitesmoke;
+      }
+      label,
+      input,
+      select,
+      button {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+      button {
+        cursor: pointer;
+        padding: 10px;
+        background: #222;
+        color: #eee;
+        border: none;
+        border-radius: 6px;
+      }
+      #message {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Submit Your Clip</h1>
+
+    <form id="submitForm">
+      <label for="name"
+        >Your Name (optional, this will show when he guesses)</label
+      >
+      <input type="text" id="name" placeholder="Your name or nickname" />
+
+      <label for="clipUrl">YouTube Clip URL</label>
+      <input
+        type="url"
+        id="clipUrl"
+        required
+        placeholder="https://www.youtube.com/watch?v=..."
+      />
+
+      <label for="rank">Your Rank</label>
+      <select id="rank" required>
+        <option value="" disabled selected>Select rank</option>
+        <option>Iron</option>
+        <option>Bronze</option>
+        <option>Silver</option>
+        <option>Gold</option>
+        <option>Platinum</option>
+        <option>Diamond</option>
+        <option>Ascendant</option>
+        <option>Immortal</option>
+        <option>Radiant</option>
+      </select>
+
+      <button type="submit">Submit Clip</button>
+    </form>
+
+    <div id="message"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // Firebase config (same as your index.html)
+      const firebaseConfig = {
+        apiKey: "AIzaSyBBrjqLqLvdUqhIIj-50Bt2sd3DA1BCtcE",
+        authDomain: "guesstherank-c3abd.firebaseapp.com",
+        databaseURL: "https://guesstherank-c3abd-default-rtdb.firebaseio.com",
+        projectId: "guesstherank-c3abd",
+        storageBucket: "guesstherank-c3abd.firebasestorage.app",
+        messagingSenderId: "593433190092",
+        appId: "1:593433190092:web:17c5389bc69a067a66ec69",
+        measurementId: "G-LS3WFQXTVD",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const form = document.getElementById("submitForm");
+      const message = document.getElementById("message");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const url = document.getElementById("clipUrl").value.trim();
+        const rank = document.getElementById("rank").value;
+
+        // YouTube URL validation regex
+        const ytRegex =
+          /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&.*)?$/;
+
+        if (!url || !rank) {
+          message.textContent = "Please fill out all required fields.";
+          message.style.color = "red";
+          return;
+        }
+
+        if (!ytRegex.test(url)) {
+          message.textContent = "Please enter a valid YouTube video URL.";
+          message.style.color = "red";
+          return;
+        }
+
+        try {
+          // Save name only if provided
+          const clipData = {
+            url,
+            rank,
+            guessed: false,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+          if (name.length > 0) clipData.name = name;
+
+          await db.collection("clips").add(clipData);
+
+          message.style.color = "lightgreen";
+          message.textContent = "Clip submitted! Thank you.";
+          form.reset();
+        } catch (error) {
+          message.style.color = "red";
+          message.textContent = "Error submitting clip. Try again later.";
+          console.error(error);
+        }
+      });
+    </script>
+  </body>
+</html>

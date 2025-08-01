@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guess The Rank - RecklessJ4</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        text-align: center;
+        background: lightslategray;
+        color: #eee;
+        margin: 0;
+      }
+      .video-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 960px;
+        aspect-ratio: 16 / 9;
+        margin: 0 auto 20px;
+        border-radius: 12px;
+        overflow: hidden;
+        display: none;
+        background: black; /* hides anything outside */
+      }
+
+      .video-wrapper iframe {
+        position: absolute;
+        top: -60px; /* shift up to crop */
+        left: 0;
+        width: 100%;
+        height: calc(100% + 118px); /* increase height to cover cropped area */
+        border: none;
+      }
+      #rankButtons button {
+        margin: 5px;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        background: #444;
+        color: #eee;
+        transition: background-color 0.2s;
+      }
+      #rankButtons button:hover {
+        background: #777;
+      }
+      #result {
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 18px;
+        min-height: 24px;
+      }
+      #controls {
+        margin-top: 25px;
+      }
+      #controls button {
+        margin: 0 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        background: #222;
+        color: #eee;
+        transition: background-color 0.2s;
+      }
+      #controls button:hover {
+        background: #555;
+      }
+      .highlight-correct {
+        border: 4px solid #4caf50; /* green border */
+        box-shadow: 0 0 10px #4caf50;
+        opacity: 1 !important;
+      }
+    </style>
+    <style>
+      #passwordOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000000cc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        flex-direction: column;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+      #passwordOverlay input {
+        font-size: 1.5rem;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: none;
+      }
+      #passwordOverlay button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+    </style>
+
+    <div id="passwordOverlay">
+      <div>Enter Streamer Password</div>
+      <input type="password" id="passwordInput" autocomplete="off" />
+      <button id="passwordSubmit">Submit</button>
+      <div id="passwordMessage" style="margin-top: 10px; color: #f88"></div>
+    </div>
+
+    <script>
+      const correctPassword = "chimmy";
+      const overlay = document.getElementById("passwordOverlay");
+      const input = document.getElementById("passwordInput");
+      const message = document.getElementById("passwordMessage");
+      const btn = document.getElementById("passwordSubmit");
+
+      function grantAccess() {
+        sessionStorage.setItem("streamer_access_granted", "true");
+        overlay.style.display = "none";
+      }
+
+      function checkSession() {
+        if (sessionStorage.getItem("streamer_access_granted") === "true") {
+          overlay.style.display = "none";
+          return true;
+        }
+        return false;
+      }
+
+      btn.onclick = () => {
+        if (input.value === correctPassword) {
+          grantAccess();
+        } else {
+          message.textContent = "Incorrect password, try again.";
+          input.value = "";
+          input.focus();
+        }
+      };
+
+      // Also allow pressing Enter key to submit
+      input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          btn.click();
+        }
+      });
+
+      if (!checkSession()) {
+        overlay.style.display = "flex";
+        input.focus();
+      }
+    </script>
+  </head>
+  <body>
+    <h1 id="title">Guess The Rank - RecklessJ4</h1>
+
+    <div id="videoContainer" class="video-wrapper">
+      <iframe
+        id="videoPlayer"
+        src=""
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowfullscreen
+        loading="lazy"
+      ></iframe>
+    </div>
+
+    <div id="rankButtons"></div>
+
+    <div id="result"></div>
+
+    <div id="controls">
+      <button id="nextBtn">Next Clip</button>
+      <button id="removeBtn">Remove Clip</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Your JS -->
+    <script src="script.js"></script>
+  </body>
+</html>
